@@ -1,4 +1,4 @@
-/************************************************** ****************
+
 INTRODUCTION
 /************************************************** ****************
 The Base Board (PCB) is the main board of the photoreactor, it consists of a module Blue Pill STM32F103CBT6 (due to the absence of STM32 chips) that acts as the master of the micro present in the PCC and the ESP32 present in the PCB itself. The ESP32 is a slave
