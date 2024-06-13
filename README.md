@@ -1,13 +1,13 @@
 
-INTRODUCTION
-/************************************************** ****************
+## INTRODUCTION
+
 The Base Board (PCB) is the main board of the photoreactor, it consists of a module Blue Pill STM32F103CBT6 (due to the absence of STM32 chips) that acts as the master of the micro present in the PCC and the ESP32 present in the PCB itself. The ESP32 is a slave
 of the Blue Pill and is responsible for communications with the user via Bluetooth and through a 2.8" TFT screen (ILI9341).
 
-/************************************************** ****************
-VERSIONS
-/************************************************** ****************
-USED ​​VERSIONS
+
+## VERSIONS
+
+## USED ​​VERSIONS
 
 "Motherboard 1.0 9V lr":
 Description: 
@@ -40,19 +40,19 @@ The idea of ​​this board is that it integrates the circuitry of the two boar
 - External soldered RTC integrated on board or soldered.
 - STM32F103CBT6 chip as main microcontroller instead of using Blue Pill
 
-/************************************************** ****************
-DETAILS OF THE FILES
-/************************************************** ****************
+
+## DETAILS OF THE FILES
+
 Within each version we find two folders, Hardware and Software.
 
-/*HARDWARE*/
+## HARDWARE
 In the Hardware folder we find the Gerber files for manufacturing the board, the BOM (bill of materials) and pick and place for automated manufacturing. Also included is an .OBJ file that can be exported to Fusion360 
 (Due to EasyEDA problems, the size must be reduced so that it is real size).
 
 In the Hardware folder of Only Modules we find two versions, ESP32D and ESP32-U, the difference is that the D has a double nucleus and the U has a single nucleus. The footprints are slightly different,but both should work fine for the firmware used. 
 They are two different folders because the footprint. The one and the other are slightly different, and sometimes there is a lack of stock of the 32D.
 
-/*SOFTWARE*/
+## SOFTWARE
 In the software folder you will find the Arduino sketch for the Blue Pill, called PCB_STM, and the Arduino sketch for the ESP32, called PhotoRX.
 PCB_STM --> Blue Pill (STM32F103CBT6 or STM32C8T6)
 PhotoRX --> ESP32	
