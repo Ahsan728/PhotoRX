@@ -7,30 +7,27 @@ of the Blue Pill and is responsible for communications with the user via Bluetoo
 
 ## VERSIONS
 
-## USED ​​VERSIONS
+### USED ​​VERSIONS
 
-"Motherboard 1.0 9V lr":
-Description: 
-This plate corresponds to the "rectangular" plate that has the TFT screen connected through the IDC connector and the same for the microSD. It has its own Buck (switched) converter with the TPS54240 IC that converts 12 V to 3.3 V with an efficiency of 90%. All digital electronics are powered by 3.3 V.
+### "Motherboard 1.0 9V lr":
+Description: This plate corresponds to the "rectangular" plate that has the TFT screen connected through the IDC connector and the same for the microSD. It has its own Buck (switched) converter with the TPS54240 IC that converts 12 V to 3.3 V with an efficiency of 90%. All digital electronics are powered by 3.3 V.
 The 12V connector also has a reverse polarity protection circuit. Use the TPS7A4901 as a 12V to 9V linear regulator with 75% efficiency. The analog electronics are powered by 9 V. Although it could be powered with 12 V If necessary.
 It has two SD cards (SPI), being external 6-pin modules (you have to bypass the linear regulator from 5V to 3.3V).
 
 The PCB_STM code is uploaded with the ST-Link to the Blue Pill and the ESP32 is uploaded with a USB-Serial converter using the buttons on the board. Once the code loading begins Hold down the "Boot" button and press the "Reset" button to load into ESP32.
 
-Failures: The UART connection of the original models is exchanged due to confusion with pin remapping on the STM32F103. In the current EasyEDA project this error has already been corrected.
+Failures: 
+The UART connection of the original models is exchanged due to confusion with pin remapping on the STM32F103. In the current EasyEDA project this error has already been corrected.
 
-"Motherboard Only Modules":
-Description:
-This board corresponds to the square motherboard that has the screen integrated inside from the board itself with a socket, and also has an encoder own soldier on plate. The reason for these two changes is not to use connectors. Added socket for external RTC DS3231.
-Its name is due to the fact that only commercial modules are used for power. In this In this case, two MP1584 switched buck converters are used that can be purchased on Amazon or Aliexpress. One of the buck converts 12 V to 9 V and the other from 12 V to 3.3 V.
-A 3.3 V microSD module is used for the Blue Pill and the SD socket on the screen for the ESP32.
+### "Motherboard Only Modules":
+Description: This board corresponds to the square motherboard that has the screen integrated inside from the board itself with a socket, and also has an encoder own soldier on plate. The reason for these two changes is not to use connectors. Added socket for external RTC DS3231. Its name is due to the fact that only commercial modules are used for power. In this In this case, two MP1584 switched buck converters are used that can be purchased on Amazon or Aliexpress. One of the buck converts 12 V to 9 V and the other from 12 V to 3.3 V. A 3.3 V microSD module is used for the Blue Pill and the SD socket on the screen for the ESP32.
 
 The code loading is the same as the previous model. 
 
 Failures: The UART connection of the original models is exchanged due to confusion with pin remapping on the STM32F103. In the current EasyEDA project this error has already been corrected.
 
-FUTURE VERSION
-"Full Custom Motherboard"
+### FUTURE VERSION
+### "Full Custom Motherboard"
 The idea of ​​this board is that it integrates the circuitry of the two boards used so far. Being a completely customized plate it would add greater added value to the product.
 - Switched 12V to 3.3V converter with the TPS54240
 - 12V to 9V linear regulator with TPS7A4901
