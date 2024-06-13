@@ -50,7 +50,7 @@ Uso de Flash  Uso RAM (Bytes)   Quedan  Versión
   // **** Declaración de constantes ***************
   // **********************************************
   //Comentar la línea cuando no haga esté en modo pruebas, entre otras cosas, espera a tener disponible el USB como trace.
-  //#define PRUEBAS     //muestra el trace por el USB aunque no esté activado
+  #define PRUEBAS     //muestra el trace por el USB aunque no esté activado
   #define VERSION           PSTR("_V02.1\n")
 
   //SIN_OSC->PB7->pin donde esta conectado el osciloscopio.
@@ -63,7 +63,7 @@ Uso de Flash  Uso RAM (Bytes)   Quedan  Versión
   //#define LEE_LED_3         gpio_read_bit(GPIOB, 9)
   //#define GRABA_LED_3(x)        gpio_write_bit(GPIOB, 9, x)
   //#define INV_LED_3         gpio_toggle_bit(GPIOB, 9) //invierte el led amarillo.
-  #define PCB1_0 //pines adaptador a la placa "PCB1.0 9V"
+  #define PCB1_0 //pines adaptador a la placa "PCB1.0 9V" y "PCB Only Modules"
   //Definiciones de pines:
   //#define P_RST_I           PA1       //pin reset PCC_I.
   //#define P_RST_D           PB0       //pin reset PCC_D.

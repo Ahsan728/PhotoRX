@@ -40,7 +40,7 @@ void loop() {
   //#ifdef PRUEBAS
   if((millis()-_timeout)>5000)
   {
-    CO_ESP32.println("Hola, aquí PCB_STM me recibes CO_ESP32?");
+    CO_ESP32.println("PCB_STM TX");
     _timeout = millis();
   }
   //#endif
