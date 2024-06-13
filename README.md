@@ -1,4 +1,4 @@
-
+# PCB
 ## INTRODUCTION
 
 The Base Board (PCB) is the main board of the photoreactor, it consists of a module Blue Pill STM32F103CBT6 (due to the absence of STM32 chips) that acts as the master of the micro present in the PCC and the ESP32 present in the PCB itself. The ESP32 is a slave
@@ -61,3 +61,30 @@ starting from line 66 of PCB_STM.h
 
 The PhotoRX sketch integrates bluetooth communication as a HUB with the PCB_STM through UART.
 It also integrates TFT screen menu and UART communication, such as RTC external clock.
+
+
+# PCC
+## INTRODUCTION
+
+The software directory for the PCC board includes two firmware versions, one for 
+the STM32F103CBT6 (PCC_V4) and another for GD32F103CBT6 (PCC_V4_GD).
+
+The GD32 is an imperfect clone of the STM32, which was used in a litter during the crisis
+of 2021 hardware, which saw the STM32 out of stock for several months. 
+
+Both firmwares are the same, differentiating the #defines from the precompiled one according to
+the used microphone.
+
+
+## Main limitations of PCC_V4_GD compared to PCC_V4:
+
+- I2C bus limited to 100 kHz.
+- USB connection not working (TRACE disabled)
+- The UART buffer collapses more easily, so communication
+	with the motherboard it should be limited to one full command (120 chars approx.)
+	every 100 ms.
+
+Another aspect to highlight is that it is possible for USB to work and I2C to work at higher speeds.
+if you use Roger Clark's STM32Duino (unofficial), since it offers support for the GD32.
+But this firmware is not directly compatible with Roger Clark's distro since you have to
+migrate some libraries of the DS18B20 temperature sensor (OneWire).
