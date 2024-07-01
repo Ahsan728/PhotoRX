@@ -142,3 +142,60 @@ void InicializaSistema() {
   attachInterrupt(digitalPinToInterrupt(P_SIN_D), INT_SIN_D, RISING);
 }
 ```
+# loop 
+```ruby
+void loop() {
+  uint32_t uTieAct = millis();
+
+  //#ifdef PRUEBAS
+  if((millis()-_timeout)>5000)
+  {
+    CO_ESP32.println("Hello, here PCB_STM you receive me CO_ESP32?");
+    _timeout = millis();
+  }
+  //#endif
+  if (uTieAct>=_uTieCom) {
+    digitalWrite(P_OSCI, HIGH);
+    //The time to complete this conditional is 32ms or 180µs (if you do not record the data with Record).
+#ifdef PRUEBAS
+    digitalWrite(P_W_D, HIGH);
+#else
+    digitalWrite(P_W_D, LOW);         //sets the wachdog PIN to 0.
+    delay(1);
+    digitalWrite(P_W_D, HIGH);          //sets the wachdog PIN high.
+#endif
+    _uTieCom = uTieAct + 98;          //next check within 98ms so that it synchronizes at 100ms when in work mode.
+    CompruebaMicros();              //checks synchronism every s
+    CompruebaTrabajo();
+#ifdef PRUEBAS
+    digitalWrite(P_W_D, LOW);
+#endif
+    digitalWrite(P_OSCI, LOW);
+  }
+
+  //Si no hay paquetes, 2,8µs.
+  if (PR_USB.available()>0) {
+    digitalWrite(P_OSCI, HIGH);
+    EntradaUSB();
+    digitalWrite(P_OSCI, LOW);
+  }
+  if (CO_ESP32.available()>0) {
+    digitalWrite(P_OSCI, HIGH);
+    Entrada1();
+    digitalWrite(P_OSCI, LOW);
+  }
+  if (CO_PCC_I.available()>0) {
+    digitalWrite(P_OSCI, HIGH);
+    Entrada2();
+    digitalWrite(P_OSCI, LOW);
+  }
+  if (CO_PCC_D.available()>0) {
+    digitalWrite(P_OSCI, HIGH);
+    Entrada3();
+    digitalWrite(P_OSCI, LOW);
+  }
+
+  //Recording with Record without recording 51,010/s
+  _uConBuc++;
+}
+```
