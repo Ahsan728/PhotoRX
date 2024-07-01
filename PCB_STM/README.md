@@ -1,4 +1,4 @@
-```
+```ruby
 void setup() {
   InicializaPines();  
   InicializaSistema();
