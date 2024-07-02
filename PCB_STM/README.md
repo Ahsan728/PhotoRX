@@ -1,7 +1,7 @@
 PCB_STM.cpp file have the following 
 
 # setup function
-
+## 1
 ```ruby
 void setup() {
  InicializaPines();  
@@ -10,6 +10,7 @@ void setup() {
 }
 ```
 In previous setup portion InicializaPines() is the initialization of mmicrocontroller pins which function is below:
+## 1.1
 ```
  InicializaPines();  
 ```
@@ -43,6 +44,7 @@ void InicializaPines() {
 }
 ```
 Just next another void function InicializaSistema() has been used which has been derived as follows:
+## 1.2
 ```
  InicializaSistema();  
 ```
@@ -339,7 +341,176 @@ bool Entrada1() {
   return false;
 }
 ```
+```
+EjecutaComando(uiFue, _tEnt);
+```
+```ruby
+bool EjecutaComando(uint8_t uiFue, char *tEnt) {
+  char cCab;
+  int16_t b1;
+  uint32_t uiVal32;
 
+  //PR_USB  uiFue=0, USB  Serial->communications with the trace; USB.
+  //CO_ESP32  uiFue=1, ESP32  Serial1->communications with ESP32; PA10_Rx1->Tx; PA9_Tx1->Rx.
+  //CO_PCC_I  uiFue=2, PCC_I  Serial2->communications with PCC_I; PA3_Rx2->Tx; PA2_Tx2->Rx.
+  //CO_PCC_D  uiFue=3, PCC_D  Serial3->communications with PCC_D; PB11_Rx2->Tx; PB10_Tx2->Rx.
+  if (strlen(tEnt)<1)   return false;
+  switch (tEnt[0]) {    
+    case '*':                 //ESP32->PCC_x
+      _uTraAct+= 80;              //to keep the job log file open.
+      //CompruebaTrabajo();
+      InicializaFicLog();
+      GrabaLog(uiFue, tEnt);
+      cCab = tEnt[1];
+      //Remove the 'I' or 'D' and replace it with '*'
+      tEnt[1] = '*';
+      GrabaLog(4, &tEnt[1]);
+      switch (cCab) {       
+        case 'I':             //command for PCC_I:
+          CO_PCC_I.println(&tEnt[1]);   //Redirect the command to PCC_I.
+          return true;
+        case 'D':             //command for PCC_D:
+          CO_PCC_D.println(&tEnt[1]);   //Redirect the command to PCC_D.
+          return true;
+        case 'T':             //command for all boards, PCC_I y PCC_D:
+          CO_PCC_I.println(&tEnt[1]);   //Redirect the command to PCC_I.
+          CO_PCC_D.println(&tEnt[1]);   //Redirect the command to PCC_D.
+          return true;
+      }
+      break;
+    case '&': case '>':             //PCC_x->ESP32.
+      _uTraAct+= 20;              //to keep the job log file open.
+      cCab = tEnt[0];             //stores the initial character ('&' or '>').
+      GrabaLog(uiFue, tEnt);
+      //Replace the initial character ('&' or '>') with the original character ('I' or 'D').
+      tEnt[0] = (uiFue==2) ? 'I' : 'D';   
+      //Generates a text with the initial character and the conformed one.
+      sprintf_P(_tSal, PSTR("%c%s"), cCab, tEnt);
+      GrabaLog(4, _tSal);
+      CO_ESP32.println(_tSal);        //sends the final text to the ESP32.
+      return true;
+    case 'b': case 'B':             //block wachdog.
+      switch (tEnt[1]) {
+        case 'E':             //block wachdog ESP323.
+          _bI_ESP32 = !_bI_ESP32;
+          return true;
+        case 'I':             //block wachdog PCC_I.
+          _bI_PCC_I = !_bI_PCC_I;
+          return true;
+        case 'D':             //block wachdog PCC_D.
+          _bI_PCC_D = !_bI_PCC_D;
+          return true;
+      }
+      break;        
+      
+    case 'f': case 'F':             //enter Date and time.
+      switch (tEnt[1]) {
+        case 'b': case 'B':         //delete data files:
+          //Delete the files if they exist.
+          CerrarFicheroLog();
+          BorraFichero(_tNFiLog);
+          BorraFichero(_tNFiTra);
+          GrabaTraceS(4, PSTR("Deleted log files"));
+          return true;
+        case 'c': case 'C':         //close the data file:
+          CerrarFicheroLog();
+          return true;
+        case 'g': case 'G':         //record Date:
+          b1 = PosTexto(2, tEnt);
+          //Format [FG][AAAA/MM/DD,hh:mm:ss] FG 2021/05/11;08:40:10
+          _bFechaOK = GrabarFecha(&tEnt[b1]);
+          //There is no break, so that it shows the recorded Date later.
+        default:
+          //After recording the Fecha, it displays it.
+          Imprime(DaFecha(_tInt));    //formato [F]
+          return true;
+      }
+      break;      
+    case 'g': case 'G':             //save file.
+      switch (tEnt[1]) {
+        case 'f': case 'F':
+          b1 = PosTexto(2, tEnt);
+          if (!Grabar(&tEnt[b1])) {   //format [GF][File_Name@Text]
+            sprintf_P(_tSal, PSTR("Error:\r\n%d[%s]"), strlen(tEnt), tEnt);
+            Imprime(_tSal);
+          }
+          return true;
+      }
+      break;
+    case 'i': case 'I':
+      switch (tEnt[1]) {
+        case 't': case 'T':         //technical information.
+          InfoTec();
+          return true;
+        case 'l': case 'L':         //display log file.
+          TRACE.println(F("Visualizar fichero de log"));
+          CerrarFicheroLog();
+          Leer(_tNFiLog);         //log file
+          return true;
+      }
+      Info();
+      return true;
+    case 'l': case 'L':
+      //Protection of SD read commands
+      switch (tEnt[1]) {
+        case 'f': case 'F':         //read data from the file.
+          b1 = PosTexto(2, tEnt);
+          Leer(&tEnt[b1]);        //format [LF][file_name]
+          return true;
+        case 'r': case 'R':         //lists only the root (data) files.
+          ListaFicheros("/", false);
+          return true;
+        case 's': case 'S':         //list all files.
+          ListaFicheros("/", true);
+          return true;
+      }
+      break;
+    case 'm': case 'M':             //create directory.
+      if ((tEnt[1]=='d' || tEnt[1]=='D')) {
+        b1 = PosTexto(2, tEnt);
+        CreaDirectorio(&tEnt[b1], true);  //MD [Directory_Name]
+        return true;
+      }
+      break;
+    case 'O':                 //turn off microphone.
+      if (tEnt[1]=='F' && tEnt[2]=='F') {
+        GrabaTraceS(4, PSTR("User shutdown"));
+        ApagarMicro(500);
+        break;
+      }
+    case 'R':                 //reset micro.
+      if (tEnt[1]=='E' && tEnt[2]=='S' && tEnt[3]=='E' && tEnt[4]=='T') {
+        GrabaTraceS(4, PSTR("User reset"));
+        ResetearMicro(500);
+        break;
+      }
+    case 'r':
+      switch (tEnt[1]) {
+        case 'd': case 'D':         //delete directory.
+          b1 = PosTexto(2, tEnt);
+          if (!BorraDirectorio(&tEnt[b1])) {  //RD [directory_name]
+            sprintf_P(_tSal, PSTR("Error:\r\n%d[%s]"), strlen(tEnt), tEnt);
+            Imprime(_tSal);
+          }
+          return true;
+      }
+      break;
+    case 't': case 'T':             //see trace.
+      TRACE.println(F("Disable trace"));
+      _bTrace = !_bTrace;
+      TRACE.println(F("Trace enabled"));
+      return true;
+  }
+  sprintf_P(_tSal, PSTR("Unknown command:\r\n%d[%s]"), strlen(tEnt), tEnt);
+  Imprime(_tSal);
+  
+  return false;
+}
+```
+
+```
+GrabaTraceS(uiFue, _tSal);
+```
 
 ```
 Entrada2();
