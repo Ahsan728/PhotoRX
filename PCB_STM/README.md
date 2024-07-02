@@ -4,12 +4,15 @@ PCB_STM.cpp file have the following
 
 ```ruby
 void setup() {
-  InicializaPines();  
+ InicializaPines();  
   InicializaSistema();
   _timeout = millis();
 }
 ```
 In previous setup portion InicializaPines() is the initialization of mmicrocontroller pins which function is below:
+```
+ InicializaPines();  
+```
 ```ruby
 void InicializaPines() {
   //Configuración:
@@ -40,6 +43,9 @@ void InicializaPines() {
 }
 ```
 Just next another void function InicializaSistema() has been used which has been derived as follows:
+```
+ InicializaSistema();  
+```
 ```ruby
 void InicializaSistema() {
   int b1;
@@ -165,6 +171,7 @@ void loop() {
     digitalWrite(P_W_D, HIGH);          //sets the wachdog PIN high.
 #endif
     _uTieCom = uTieAct + 98;          //next check within 98ms so that it synchronizes at 100ms when in work mode.
+
     CompruebaMicros();           //checks synchronism every s
     CompruebaTrabajo();
 #ifdef PRUEBAS
@@ -199,3 +206,199 @@ void loop() {
   _uConBuc++;
 }
 ```
+In loop section we will find a function name CompruebaMicros();  which is as follows:
+
+```
+CompruebaMicros();
+```
+```ruby
+void CompruebaMicros() {
+#ifdef PRUEBAS
+  //The time to complete this conditional is 32ms, if you record to the card, the loops are 44,990/s to 45,110/s, if you do not record 51,010/s
+  sprintf_P(_tSal, PSTR("Creditos=%u\t%u\t%u"), _uESP32, _uPCC_I, _uPCC_D);
+  TRACE.println(_tSal);             //sin grabar
+  sprintf_P(_tSal, PSTR("Bucles x s=%lu\t%lu\t%lu\t%lu"), _uConBuc, _vuESP32, _vuPCC_I, _vuPCC_D);
+  TRACE.println(_tSal);             //sin grabar
+  //In TEST mode it is not necessary for the PCC_D or the ESP32 to be connected
+  _bESP32 = true;
+  _bPCC_D = true;
+#endif
+
+  //to be able to view them with IT
+  _uIConBuc = _uConBuc;
+  _uIESP32 = _vuESP32;
+  _uIPCC_I = _vuPCC_I;
+  _uIPCC_D = _vuPCC_D;
+  _bESP32 |= _bI_ESP32;             //to be able to block the wachdog from menu BE
+  _bPCC_I |= _bI_PCC_I;             //to be able to block the wachdog from menu BI
+  _bPCC_D |= _bI_PCC_D;             //to be able to block the wachdog from menu BD
+  
+  _uConBuc = 0;
+  //Micro ESP32
+  _uESP32 = ResetMicro(_bESP32, 1, P_SIN_E, P_RST_E, _uESP32);
+  _bESP32 = false;  
+  if (_uESP32==21)  attachInterrupt(digitalPinToInterrupt(P_SIN_I), INT_SIN_I, RISING);
+  //Micro PCC_I     P_SIN_I
+  _uPCC_I = ResetMicro(_bPCC_I, 2, P_SIN_I, P_RST_I, _uPCC_I);
+  _bPCC_I = false;
+  if (_uPCC_I==21)  attachInterrupt(digitalPinToInterrupt(P_SIN_I), INT_SIN_I, RISING);
+  //Micro PCC_D
+  _uPCC_D = ResetMicro(_bPCC_D, 3, P_SIN_D, P_RST_D, _uPCC_D);
+  _bPCC_D = false;
+  if (_uPCC_D==21)  attachInterrupt(digitalPinToInterrupt(P_SIN_I), INT_SIN_I, RISING);
+}
+```
+Another function just after it CompruebaTrabajo() which is as follows: 
+```
+CompruebaTrabajo()
+```
+
+```ruby
+void CompruebaTrabajo() {
+  if (_uTraAct>0 && (_uTraAct%10)==0) {
+    TRACE.print(F("_uTraAct="));TRACE.println(_uTraAct);
+  }
+  if (_bFicTOK && _uTraAct==0) {
+    TRACE.println(F("Cierra log 0"));
+    CerrarFicheroLog();
+  }
+  else if (!_bFicTOK && _uTraAct>0) {   
+    TRACE.println(F("Inicializa log"));
+    InicializaFicLog();
+  }
+  if (_uTraAct>100) _uTraAct = 100;
+  if (_uTraAct>0)   _uTraAct--;
+}
+```
+
+```
+EntradaUSB();
+```
+```ruby
+bool EntradaUSB() {
+  uint32_t ulTie;
+  uint8_t b1 = 0;
+  bool bComOK = false;
+
+  ulTie = TIMEOUT + millis();           //reset the timeout
+  while (true) {
+    if (PR_USB.available()>0) {
+      ulTie = TIMEOUT + millis();       //reset the timeout
+      _tEnt[b1] = PR_USB.read();
+      if (_tEnt[b1]=='\n') {
+        bComOK = true;
+        break;                //correct output.
+      }
+      if (_tEnt[b1]!='\r')  b1++;     //increments the counter whenever it is not '\r'.
+      if (b1 >= (L_TX-3)) break;        //output by text length.
+    }
+    if (ulTie < millis()) break;        //output by TimeOut.
+  }
+  _tEnt[b1] = (char)0;              //add final text
+
+  if (!bComOK) {
+    sprintf_P(_tSal, PSTR("Comando erroneo(%s)\t[%s]"), _tOrigen[0], _tEnt);
+    GrabaTraceS(0, _tSal);
+    return false;
+  }
+  EjecutaComando(0, _tEnt);
+
+  return true;
+}
+```
+
+
+```
+Entrada1();
+```
+
+```ruby
+bool Entrada1() {
+  uint32_t ulTie;
+  uint8_t b1 = 0;
+  uint8_t uiFue = 1;
+
+  ulTie = TIMEOUT + millis();           //reset the timeout
+  while (true) {
+    if (CO_ESP32.available()>0) {
+      ulTie = TIMEOUT + millis();       //reset the timeout
+      _tEnt[b1] = CO_ESP32.read();
+      if (_tEnt[b1]=='\n') {
+        _tEnt[b1] = (char)0;        //add final text
+        EjecutaComando(uiFue, _tEnt);
+        return true;
+      }
+      if (_tEnt[b1]!='\r')  b1++;     //increments the counter whenever it is not '\r'.
+      if (b1 >= (L_TX-3)) break;        //output by text length.
+    }
+    if (ulTie < millis()) break;        //output by TimeOut.
+  }
+  _tEnt[b1] = (char)0;              //add final text
+  sprintf_P(_tSal, PSTR("Comando erroneo(%s)\t[%s]"), _tOrigen[uiFue], _tEnt);
+  GrabaTraceS(uiFue, _tSal);
+  return false;
+}
+```
+
+
+```
+Entrada2();
+```
+```ruby
+bool Entrada2() {
+  uint32_t ulTie;
+  uint8_t b1 = 0;
+  uint8_t uiFue = 2;
+
+  ulTie = TIMEOUT + millis();           //reset the timeout
+  while (true) {
+    if (CO_PCC_I.available()>0) {
+      ulTie = TIMEOUT + millis();       //reset the timeout
+      _tEnt[b1] = CO_PCC_I.read();
+      if (_tEnt[b1]=='\n') {
+        _tEnt[b1] = (char)0;        //add final text
+        EjecutaComando(uiFue, _tEnt);
+        return true;
+      }
+      if (_tEnt[b1]!='\r')  b1++;     //increments the counter whenever it is not'\r'.
+      if (b1 >= (L_TX-3)) break;        //output by text length.
+    }
+    if (ulTie < millis()) break;        //output by TimeOut.
+  }
+  _tEnt[b1] = (char)0;              //add final text
+  sprintf_P(_tSal, PSTR("Comando erroneo(%s)\t[%s]"), _tOrigen[uiFue], _tEnt);
+  GrabaTraceS(uiFue, _tSal);
+  return false;
+}
+```
+
+```
+Entrada3();
+```
+```ruby
+bool Entrada3() {
+  uint32_t ulTie;
+  uint8_t b1 = 0;
+  uint8_t uiFue = 3;
+
+  ulTie = TIMEOUT + millis();           //reset the timeout
+  while (true) {
+    if (CO_PCC_D.available()>0) {
+      ulTie = TIMEOUT + millis();       //reset the timeout
+      _tEnt[b1] = CO_PCC_D.read();
+      if (_tEnt[b1]=='\n') {
+        _tEnt[b1] = (char)0;        //add final text
+        EjecutaComando(uiFue, _tEnt);
+        return true;
+      }
+      if (_tEnt[b1]!='\r')  b1++;     //increments the counter whenever it is not '\r'.
+      if (b1 >= (L_TX-3)) break;        //output by text length.
+    }
+    if (ulTie < millis()) break;        //output by TimeOut.
+  }
+  _tEnt[b1] = (char)0;              //add final text
+  sprintf_P(_tSal, PSTR("Comando erroneo(%s)\t[%s]"), _tOrigen[uiFue], _tEnt);
+  GrabaTraceS(uiFue, _tSal);
+  return false;
+}
+```ruby
