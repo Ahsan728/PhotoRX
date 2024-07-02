@@ -45,7 +45,7 @@ void InicializaSistema() {
   int b1;
 
   //Initialize communications:
-  PR_USB.begin(115200);             //Serial->comunicaciones con el trace; USB.
+  PR_USB.begin(115200);             //Serial->communications with the trace; USB.
   CO_ESP32.begin(115200);             //Serial1->communications with ESP32; PA10_Rx1->Tx; PA9_Tx1->Rx.
   CO_PCC_I.begin(115200);             //Serial2->communications with PCC_I; PA3_Rx2->Tx; PA2_Tx2->Rx.
   CO_PCC_D.begin(115200);             //Serial3->communications with PCC_D; PB11_Rx2->Tx; PB10_Tx2->Rx.
