@@ -165,7 +165,7 @@ void loop() {
     digitalWrite(P_W_D, HIGH);          //sets the wachdog PIN high.
 #endif
     _uTieCom = uTieAct + 98;          //next check within 98ms so that it synchronizes at 100ms when in work mode.
-    $\color{blue}{\textsf{CompruebaMicros();}}$            //checks synchronism every s
+    CompruebaMicros();           //checks synchronism every s
     CompruebaTrabajo();
 #ifdef PRUEBAS
     digitalWrite(P_W_D, LOW);
