@@ -52,6 +52,10 @@ Just next another void function InicializaSistema() has been used which has been
 - Debug mode PRUEBAS, if available --> Test Mode | if (PR_USB.available()>0) --> EntradaUSB(); | Reverse wachdog
 - RTC timer will be initiated, Date time set, synchronism ESP32 | Reverse wachdog
 - if (CO_ESP32.available()>0) -->  Entrada1(); (Communication with ESP32)
+- Initialize SD card, Extract data and print.
+- Use Grabar boolean fron PCB_Grabar.cpp to grab data in SD card
+- Run the function InfoTec();
+- Then activate the PCC and Interruptions.
 
 ```ruby
 void InicializaSistema() {
