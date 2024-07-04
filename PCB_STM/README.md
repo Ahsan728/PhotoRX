@@ -159,6 +159,110 @@ void InicializaSistema() {
   attachInterrupt(digitalPinToInterrupt(P_SIN_D), INT_SIN_D, RISING);
 }
 ```
+# 1.2.1
+
+```
+EntradaUSB();
+```
+```ruby
+bool EntradaUSB() {
+  uint32_t ulTie;
+  uint8_t b1 = 0;
+  bool bComOK = false;
+
+  ulTie = TIMEOUT + millis();           //reset the timeout
+  while (true) {
+    if (PR_USB.available()>0) {
+      ulTie = TIMEOUT + millis();       //reset the timeout
+      _tEnt[b1] = PR_USB.read();
+      if (_tEnt[b1]=='\n') {
+        bComOK = true;
+        break;                //correct output.
+      }
+      if (_tEnt[b1]!='\r')  b1++;     //increments the counter whenever it is not '\r'.
+      if (b1 >= (L_TX-3)) break;        //output by text length.
+    }
+    if (ulTie < millis()) break;        //output by TimeOut.
+  }
+  _tEnt[b1] = (char)0;              //add final text
+
+  if (!bComOK) {
+    sprintf_P(_tSal, PSTR("Comando erroneo(%s)\t[%s]"), _tOrigen[0], _tEnt);
+    GrabaTraceS(0, _tSal);
+    return false;
+  }
+  EjecutaComando(0, _tEnt);
+
+  return true;
+}
+```
+# 1.2.2
+
+```
+Entrada1();
+```
+
+```ruby
+bool Entrada1() {
+  uint32_t ulTie;
+  uint8_t b1 = 0;
+  uint8_t uiFue = 1;
+
+  ulTie = TIMEOUT + millis();           //reset the timeout
+  while (true) {
+    if (CO_ESP32.available()>0) {
+      ulTie = TIMEOUT + millis();       //reset the timeout
+      _tEnt[b1] = CO_ESP32.read();
+      if (_tEnt[b1]=='\n') {
+        _tEnt[b1] = (char)0;        //add final text
+        EjecutaComando(uiFue, _tEnt);
+        return true;
+      }
+      if (_tEnt[b1]!='\r')  b1++;     //increments the counter whenever it is not '\r'.
+      if (b1 >= (L_TX-3)) break;        //output by text length.
+    }
+    if (ulTie < millis()) break;        //output by TimeOut.
+  }
+  _tEnt[b1] = (char)0;              //add final text
+  sprintf_P(_tSal, PSTR("Comando erroneo(%s)\t[%s]"), _tOrigen[uiFue], _tEnt);
+  GrabaTraceS(uiFue, _tSal);
+  return false;
+}
+```
+# 1.2.3
+```
+InfoTec();
+```
+```ruby
+void InfoTec() {
+  DaFecha(_tInt);
+  sprintf_P(_tSal, PSTR("\r\nInformacion Technical:\r\n%s\t%lu"), _tInt, millis());
+  InfoFW(_tSal);
+  Imprime(_tSal);
+  delay(10);                    //to clear the buffer before continuing.
+  
+  Imprime((_bFechaOK) ? F("Fecha OK") : F("Date incorrect"), true);
+  if (_bSD_Ok) {
+    sprintf_P(_tSal, PSTR("SD OK\tVelocidad\t%uMHz\r\nFichero LOG:\t%s\t%s\r\n")
+      , _uimVelSPI[_uiVelSPI], _tNFiLog, _tNFiTra);
+  }
+  else {
+    strcpy_P(_tSal, _GraEven[0]);
+  }
+  Imprime(_tSal);
+  
+  //With _rtcVal.getTime() 5.42µs
+  //Loops working:  49562 0 10  0 <<>>  49546 0 10  0
+  //Loops without work: 51724 0 10  0 <<>>  52257 0 10  0
+  //With millis()      5.08µs
+  //Loops working:  49562 0 10  0 <<>>  49546 0 10  0
+  //Loops without work: 51724 0 10  0 <<>>  52257 0 10  0
+  sprintf_P(_tSal, PSTR("Bucles:\t%lu\t%lu\t%lu\t%lu\r\nCreditos:\t%u\t%u\t%u\r\n")
+    , _uIConBuc, _uIESP32, _uIPCC_I, _uIPCC_D, _uESP32, _uPCC_I, _uPCC_D);  
+  Imprime(_tSal);
+}
+```
+
 # loop 
 ```ruby
 void loop() {
@@ -282,74 +386,6 @@ void CompruebaTrabajo() {
 }
 ```
 
-```
-EntradaUSB();
-```
-```ruby
-bool EntradaUSB() {
-  uint32_t ulTie;
-  uint8_t b1 = 0;
-  bool bComOK = false;
-
-  ulTie = TIMEOUT + millis();           //reset the timeout
-  while (true) {
-    if (PR_USB.available()>0) {
-      ulTie = TIMEOUT + millis();       //reset the timeout
-      _tEnt[b1] = PR_USB.read();
-      if (_tEnt[b1]=='\n') {
-        bComOK = true;
-        break;                //correct output.
-      }
-      if (_tEnt[b1]!='\r')  b1++;     //increments the counter whenever it is not '\r'.
-      if (b1 >= (L_TX-3)) break;        //output by text length.
-    }
-    if (ulTie < millis()) break;        //output by TimeOut.
-  }
-  _tEnt[b1] = (char)0;              //add final text
-
-  if (!bComOK) {
-    sprintf_P(_tSal, PSTR("Comando erroneo(%s)\t[%s]"), _tOrigen[0], _tEnt);
-    GrabaTraceS(0, _tSal);
-    return false;
-  }
-  EjecutaComando(0, _tEnt);
-
-  return true;
-}
-```
-
-
-```
-Entrada1();
-```
-
-```ruby
-bool Entrada1() {
-  uint32_t ulTie;
-  uint8_t b1 = 0;
-  uint8_t uiFue = 1;
-
-  ulTie = TIMEOUT + millis();           //reset the timeout
-  while (true) {
-    if (CO_ESP32.available()>0) {
-      ulTie = TIMEOUT + millis();       //reset the timeout
-      _tEnt[b1] = CO_ESP32.read();
-      if (_tEnt[b1]=='\n') {
-        _tEnt[b1] = (char)0;        //add final text
-        EjecutaComando(uiFue, _tEnt);
-        return true;
-      }
-      if (_tEnt[b1]!='\r')  b1++;     //increments the counter whenever it is not '\r'.
-      if (b1 >= (L_TX-3)) break;        //output by text length.
-    }
-    if (ulTie < millis()) break;        //output by TimeOut.
-  }
-  _tEnt[b1] = (char)0;              //add final text
-  sprintf_P(_tSal, PSTR("Comando erroneo(%s)\t[%s]"), _tOrigen[uiFue], _tEnt);
-  GrabaTraceS(uiFue, _tSal);
-  return false;
-}
-```
 ```
 EjecutaComando(uiFue, _tEnt);
 ```
