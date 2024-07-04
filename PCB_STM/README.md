@@ -48,6 +48,11 @@ Just next another void function InicializaSistema() has been used which has been
 ```
  InicializaSistema();  
 ```
+- PR_USB, CO_ESP32, CO_PCC_I, CO_PCC_D serial communication braud rate 115200 will be initiated.
+- Debug mode PRUEBAS, if available --> Test Mode | if (PR_USB.available()>0) --> EntradaUSB(); | Reverse wachdog
+- RTC timer will be initiated, Date time set, synchronism ESP32 | Reverse wachdog
+- if (CO_ESP32.available()>0) -->  Entrada1(); (Communication with ESP32)
+
 ```ruby
 void InicializaSistema() {
   int b1;
